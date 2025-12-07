@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/build-app.bat">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/build-app.bat" />
+              <option name="updatedContent" value="@echo off&#10;echo ========================================&#10;echo   Building Crime Tracking App&#10;echo ========================================&#10;echo.&#10;&#10;cd /d &quot;%~dp0&quot;&#10;&#10;echo Step 1: Cleaning project...&#10;call gradlew.bat clean&#10;&#10;echo.&#10;echo Step 2: Building project...&#10;call gradlew.bat build --stacktrace&#10;&#10;echo.&#10;echo ========================================&#10;echo   Build Complete!&#10;echo ========================================&#10;echo.&#10;echo If successful, you can now run the app.&#10;echo.&#10;pause&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

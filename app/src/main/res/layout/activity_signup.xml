@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#1A1A1A">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center">
+
+        <!-- Top Spacer to push content to center -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Logo -->
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_shield"
+            android:tint="@color/redPrimary" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Join CrimeWatch"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create your account to stay safe"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            android:layout_gravity="center" />
+
+        <!-- Full Name -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Full Name"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="start" />
+
+        <EditText
+            android:id="@+id/etFullName"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/input_field_dark"
+            android:hint="Enter your full name"
+            android:drawableStart="@drawable/ic_person"
+            android:padding="12dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/textHint" />
+
+        <!-- Email -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email Address"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="start" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/input_field_dark"
+            android:hint="your.email@example.com"
+            android:drawableStart="@drawable/ic_email"
+            android:padding="12dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/textHint"
+            android:inputType="textEmailAddress" />
+
+        <!-- Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="start" />
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/input_field_dark"
+            android:hint="Create a strong password"
+            android:drawableStart="@drawable/ic_lock"
+            android:drawableEnd="@drawable/ic_visibility"
+            android:padding="12dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/textHint"
+            android:inputType="textPassword" />
+
+        <!-- Confirm Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm Password"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="start" />
+
+        <EditText
+            android:id="@+id/etConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/input_field_dark"
+            android:hint="Re-enter your password"
+            android:drawableStart="@drawable/ic_lock"
+            android:drawableEnd="@drawable/ic_visibility"
+            android:padding="12dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/textHint"
+            android:inputType="textPassword" />
+
+        <!-- Create Account Button -->
+        <Button
+            android:id="@+id/btnCreateAccount"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/redPrimary"
+            android:text="Create Account"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <!-- Bottom Spacer to push Sign In to bottom -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Sign In -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Already have an account?"
+            android:textColor="@color/white"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/tvSignIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign In"
+            android:textColor="@color/redPrimary"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+</ScrollView>

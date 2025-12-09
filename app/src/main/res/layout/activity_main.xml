@@ -9,7 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/white"
+        android:background="@color/redPrimary"
         android:orientation="horizontal"
         android:paddingStart="8dp"
         android:paddingEnd="16dp"
@@ -20,10 +20,10 @@
             android:id="@+id/btnBack"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@android:drawable/ic_menu_revert"
+            android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back to Home"
-            android:tint="@android:color/black" />
+            app:tint="@color/white" />
 
         <TextView
             android:layout_width="0dp"
@@ -32,7 +32,7 @@
             android:text="Crime Tracker"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/black"/>
 
     </LinearLayout>
 
@@ -41,13 +41,13 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/redPrimary"
         android:elevation="4dp"
         app:tabMode="fixed"
         app:tabGravity="fill"
-        app:tabTextColor="@android:color/darker_gray"
-        app:tabSelectedTextColor="@color/redPrimary"
-        app:tabIndicatorColor="@color/redPrimary"
+        app:tabTextColor="@color/black"
+        app:tabSelectedTextColor="@color/black"
+        app:tabIndicatorColor="@color/black"
         app:tabIndicatorHeight="3dp" />
 
     <!-- ViewPager2 for swipeable content -->

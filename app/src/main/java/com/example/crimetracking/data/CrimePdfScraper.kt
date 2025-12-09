@@ -1,12 +1,11 @@
-package com.example.crimetracking
+package com.example.crimetracking.data
 
 import android.content.Context
-import com.example.crimetracker.Crime
-import java.io.File
-import java.net.URL
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
+import java.io.File
+import java.net.URL
 
 object CrimePdfScraper {
 

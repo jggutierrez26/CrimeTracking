@@ -1,5 +1,4 @@
-package com.example.crimetracker
-
+package com.example.crimetracking.data
 
 data class Crime(
     val date: String,

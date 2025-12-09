@@ -36,7 +36,7 @@ class ReportsFragment : Fragment() {
         // Launch coroutine to fetch and display PDF data
         CoroutineScope(Dispatchers.Main).launch {
             val reports: List<Crime> = withContext(Dispatchers.IO) {
-                CrimePdfScraper.fetchCrimeReports(requireContext())
+                CrimePdfScraper.fetchCrimes(requireContext())
             }
 
             reportsRecycler.adapter = CrimeReportAdapter(reports)

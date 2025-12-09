@@ -37,9 +37,9 @@ class HomeActivity : AppCompatActivity() {
 
         // Crime Reports button click handler
         binding.btnReports.setOnClickListener {
-            Toast.makeText(this, "Crime Reports - Coming Soon", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to ReportsActivity
-            // startActivity(Intent(this, ReportsActivity::class.java))
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("OPEN_TAB", 1) // 1 is the Reports tab index
+            startActivity(intent)
         }
 
         // Community Feed button click handler

@@ -1,8 +1,9 @@
 package com.example.crimetracker
 
+
 data class Crime(
-    val address: String,
-    val type: String,
     val date: String,
-    val time: String
+    val time: String,
+    val location: String,
+    val offense: String
 )

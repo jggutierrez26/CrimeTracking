@@ -2,17 +2,23 @@ package com.example.crimetracking
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class ProfileActivity : AppCompatActivity() {
+
+    companion object {
+        private const val MAX_EMERGENCY_CONTACTS = 3
+    }
 
     private lateinit var auth: FirebaseAuth
     private val db = Firebase.firestore
@@ -22,6 +28,8 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var tvFirstName: TextView
     private lateinit var tvLastName: TextView
     private lateinit var tvEmail: TextView
+    private lateinit var btnChangeEmail: Button
+    private lateinit var btnChangePassword: Button
     private lateinit var btnAddEmergencyContact: Button
     private lateinit var rvEmergencyContacts: RecyclerView
     private lateinit var tvNoContacts: TextView
@@ -37,6 +45,8 @@ class ProfileActivity : AppCompatActivity() {
         tvFirstName = findViewById(R.id.tvFirstName)
         tvLastName = findViewById(R.id.tvLastName)
         tvEmail = findViewById(R.id.tvEmail)
+        btnChangeEmail = findViewById(R.id.btnChangeEmail)
+        btnChangePassword = findViewById(R.id.btnChangePassword)
         btnAddEmergencyContact = findViewById(R.id.btnAddEmergencyContact)
         rvEmergencyContacts = findViewById(R.id.rvEmergencyContacts)
         tvNoContacts = findViewById(R.id.tvNoContacts)
@@ -60,9 +70,25 @@ class ProfileActivity : AppCompatActivity() {
             finish()
         }
 
+        btnChangeEmail.setOnClickListener {
+            showChangeEmailDialog()
+        }
+
+        btnChangePassword.setOnClickListener {
+            showChangePasswordDialog()
+        }
 
         btnAddEmergencyContact.setOnClickListener {
-            showAddEmergencyContactDialog()
+            if (emergencyContacts.size >= MAX_EMERGENCY_CONTACTS) {
+                AlertDialog.Builder(this)
+                    .setTitle("Maximum Contacts Reached")
+                    .setMessage("You can only have up to $MAX_EMERGENCY_CONTACTS emergency contacts. Please delete a contact before adding a new one.")
+                    .setPositiveButton("OK", null)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .show()
+            } else {
+                showAddEmergencyContactDialog()
+            }
         }
     }
 
@@ -136,8 +162,133 @@ class ProfileActivity : AppCompatActivity() {
             tvNoContacts.visibility = View.GONE
             android.util.Log.d("ProfileActivity", "Showing RecyclerView with ${emergencyContacts.size} contacts")
         }
+
+        // Update button state based on contact limit
+        if (emergencyContacts.size >= MAX_EMERGENCY_CONTACTS) {
+            btnAddEmergencyContact.isEnabled = false
+            btnAddEmergencyContact.alpha = 0.5f
+            android.util.Log.d("ProfileActivity", "Maximum contacts reached ($MAX_EMERGENCY_CONTACTS), add button disabled")
+        } else {
+            btnAddEmergencyContact.isEnabled = true
+            btnAddEmergencyContact.alpha = 1.0f
+        }
     }
 
+    private fun showChangeEmailDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_email, null)
+        val etNewEmail = dialogView.findViewById<EditText>(R.id.etNewEmail)
+        val etPassword = dialogView.findViewById<EditText>(R.id.etPassword)
+
+        AlertDialog.Builder(this)
+            .setTitle("Change Email")
+            .setView(dialogView)
+            .setPositiveButton("Change") { _, _ ->
+                val newEmail = etNewEmail.text.toString().trim()
+                val password = etPassword.text.toString()
+
+                if (newEmail.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
+                    Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (password.isEmpty()) {
+                    Toast.makeText(this, "Please enter your password", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                changeEmail(newEmail, password)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun changeEmail(newEmail: String, password: String) {
+        val user = auth.currentUser
+        if (user != null && user.email != null) {
+            // Re-authenticate user first
+            val credential = EmailAuthProvider.getCredential(user.email!!, password)
+
+            user.reauthenticate(credential)
+                .addOnSuccessListener {
+                    // Update email in Firebase Auth
+                    @Suppress("DEPRECATION")
+                    user.updateEmail(newEmail)
+                        .addOnSuccessListener {
+                            // Update email in Firestore
+                            db.collection("users").document(user.uid)
+                                .update("email", newEmail)
+                                .addOnSuccessListener {
+                                    tvEmail.text = newEmail
+                                    Toast.makeText(this, "Email updated successfully", Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error updating email: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Authentication failed. Check your password.", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun showChangePasswordDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null)
+        val etCurrentPassword = dialogView.findViewById<EditText>(R.id.etCurrentPassword)
+        val etNewPassword = dialogView.findViewById<EditText>(R.id.etNewPassword)
+        val etConfirmPassword = dialogView.findViewById<EditText>(R.id.etConfirmPassword)
+
+        AlertDialog.Builder(this)
+            .setTitle("Change Password")
+            .setView(dialogView)
+            .setPositiveButton("Change") { _, _ ->
+                val currentPassword = etCurrentPassword.text.toString()
+                val newPassword = etNewPassword.text.toString()
+                val confirmPassword = etConfirmPassword.text.toString()
+
+                if (currentPassword.isEmpty()) {
+                    Toast.makeText(this, "Please enter current password", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (newPassword.length < 6) {
+                    Toast.makeText(this, "New password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (newPassword != confirmPassword) {
+                    Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                changePassword(currentPassword, newPassword)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun changePassword(currentPassword: String, newPassword: String) {
+        val user = auth.currentUser
+        if (user != null && user.email != null) {
+            // Re-authenticate user first
+            val credential = EmailAuthProvider.getCredential(user.email!!, currentPassword)
+
+            user.reauthenticate(credential)
+                .addOnSuccessListener {
+                    // Update password
+                    user.updatePassword(newPassword)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Password updated successfully", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error updating password: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Authentication failed. Check your current password.", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
 
     private fun showAddEmergencyContactDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_emergency_contact, null)
@@ -336,7 +487,7 @@ class ProfileActivity : AppCompatActivity() {
 
 // RecyclerView Adapter for Emergency Contacts
 class EmergencyContactsAdapter(
-    private val contacts: List<EmergencyContact>,
+    private val contacts: MutableList<EmergencyContact>,
     private val onEditClick: (EmergencyContact) -> Unit,
     private val onDeleteClick: (EmergencyContact) -> Unit
 ) : RecyclerView.Adapter<EmergencyContactsAdapter.ViewHolder>() {
@@ -360,9 +511,11 @@ class EmergencyContactsAdapter(
         holder.tvName.text = contact.name
         holder.tvRelation.text = contact.relation
         holder.tvPhone.text = contact.phoneNumber
+
         holder.btnEdit.setOnClickListener {
             onEditClick(contact)
         }
+
         holder.btnDelete.setOnClickListener {
             onDeleteClick(contact)
         }

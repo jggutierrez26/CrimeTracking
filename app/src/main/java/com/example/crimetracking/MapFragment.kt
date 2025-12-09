@@ -303,7 +303,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val crimeCount = crimesWithinRadius.size
 
         // Display the result using a long toast message
-        val message = "There are $crimeCount crime markers along the way."
+        val message = "There are $crimeCount crime incidents along the way."
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).apply {
             setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 100)
             show()

@@ -44,9 +44,9 @@ class HomeActivity : AppCompatActivity() {
 
         // Community Feed button click handler
         binding.btnCommunity.setOnClickListener {
-            Toast.makeText(this, "Community Feed - Coming Soon", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to CommunityActivity
-            // startActivity(Intent(this, CommunityActivity::class.java))
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("OPEN_TAB", 2) // 2 is the Community tab index
+            startActivity(intent)
         }
 
         // Emergency SOS button click handler

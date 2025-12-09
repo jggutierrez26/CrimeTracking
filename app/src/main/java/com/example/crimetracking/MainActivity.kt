@@ -21,6 +21,12 @@ class MainActivity : AppCompatActivity() {
 
         setupViewPager()
         setupBackButton()
+
+        // Check if we should open a specific tab
+        val tabToOpen = intent.getIntExtra("OPEN_TAB", 0)
+        if (tabToOpen > 0) {
+            binding.viewPager.setCurrentItem(tabToOpen, false)
+        }
     }
 
     private fun setupViewPager() {

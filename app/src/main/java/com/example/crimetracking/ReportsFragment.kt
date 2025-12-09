@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,7 +18,7 @@ import kotlinx.coroutines.withContext
 
 class ReportsFragment : Fragment() {
 
-    private lateinit var reportsRecycler: RecyclerView
+    private lateinit var statusText: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,16 +31,26 @@ class ReportsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        reportsRecycler = view.findViewById(R.id.reportsRecycler)
-        reportsRecycler.layoutManager = LinearLayoutManager(requireContext())
+        statusText = view.findViewById(R.id.statusText)
 
-        // Launch coroutine to fetch and display PDF data
         CoroutineScope(Dispatchers.Main).launch {
-            val reports: List<Crime> = withContext(Dispatchers.IO) {
+            statusText.text = "Loading reports…"
+
+            val reports = withContext(Dispatchers.IO) {
                 CrimePdfScraper.fetchCrimes(requireContext())
             }
 
-            reportsRecycler.adapter = CrimeReportAdapter(reports)
+            if (reports.isEmpty()) {
+                statusText.text = "No reports found."
+                return@launch
+            }
+
+            // Convert list to big readable text
+            val displayText = reports.joinToString("\n\n") {
+                "• ${it.offense}"
+            }
+
+            statusText.text = displayText
         }
     }
 }

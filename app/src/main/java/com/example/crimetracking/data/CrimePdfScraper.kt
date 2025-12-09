@@ -15,39 +15,60 @@ object CrimePdfScraper {
         val pdfUrl = "https://dcil.syr.edu/tasks/DCL.pdf"
         val pdfFile = File(context.cacheDir, "crime_data.pdf")
 
-        // download PDF
         URL(pdfUrl).openStream().use { input ->
             pdfFile.outputStream().use { output ->
                 input.copyTo(output)
             }
         }
 
-        // parse PDF text
         val document = PDDocument.load(pdfFile)
         val stripper = PDFTextStripper()
         val text = stripper.getText(document)
         document.close()
-
-        // Convert PDF lines into structured crime entries
         return parsePdfText(text)
     }
 
     private fun parsePdfText(text: String): List<Crime> {
         val reports = mutableListOf<Crime>()
 
-        // Splitting lines from PDF
-        val lines = text.split("\n")
-
-        // Example pattern matching (adjust based on PDF format!)
-        val regex = Regex("""(\d{2}/\d{2}/\d{4})\s+(\d{2}:\d{2})\s+(.*?)\s{2,}(.*)""")
+        val lines = text.lines()
 
         for (line in lines) {
-            val match = regex.find(line)
-            if (match != null) {
-                val (date, time, location, offense) = match.destructured
-                reports.add(Crime(date, time, location, offense))
+            // Skip header rows or empty rows
+            if (line.isBlank()) continue
+            if (line.contains("Nature", ignoreCase = true)) continue
+            if (line.contains("Syracuse University", ignoreCase = true)) continue
+
+            val cols = line.trim().split(Regex("\\s{2,}"))
+
+            if (cols.size < 4) continue
+
+            val offense = cols[0]                                  // Nature – Classification
+            val dateTimeReported = cols[2]                          // "12/07/2025 14:32"
+            val location = cols[3]                                  // General Location
+            val date: String
+            val time: String
+
+            if (dateTimeReported.contains(" ")) {
+                val parts = dateTimeReported.split(" ")
+                date = parts.getOrNull(0) ?: "Unknown"
+                time = parts.getOrNull(1) ?: "Unknown"
+            } else {
+                date = dateTimeReported
+                time = "Unknown"
             }
+
+            reports.add(
+                Crime(
+                    date = date,
+                    time = time,
+                    location = location,
+                    offense = offense
+                )
+            )
         }
+
         return reports
     }
+
 }

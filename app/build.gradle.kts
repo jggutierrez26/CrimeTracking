@@ -7,22 +7,17 @@ plugins {
 }
 
 android {
-    namespace = "com.example.crimetracker"
+    namespace = "com.example.crimetracking"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.crimetracker"
+        applicationId = "com.example.crimetracking"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        manifestPlaceholders.putAll(
-            mapOf(
-                "MAPS_API_KEY" to (project.findProperty("MAPS_API_KEY") ?: "")
-            )
-        )
     }
 
     buildTypes {
@@ -33,27 +28,21 @@ android {
                 "proguard-rules.pro"
             )
         }
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
-        }
-        kotlinOptions {
-            jvmTarget = "11"
-        }
-        buildFeatures {
-            compose = true
-            viewBinding = true
-        }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+        viewBinding = true
+        buildConfig = true
     }
 }
 

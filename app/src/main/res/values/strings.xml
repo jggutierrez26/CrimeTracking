@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CrimeTracking</string>
+    <string name='google_maps_key'>AIzaSyCI7WQy0F6l5wqBMRqp37U6lA41Ipoac6Q</string>
 </resources>

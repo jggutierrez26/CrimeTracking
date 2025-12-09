@@ -1,4 +1,4 @@
-package com.example.crimetracker
+package com.example.crimetracking
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -17,8 +17,6 @@ import java.io.InputStream
 import java.util.Scanner
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +24,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import com.google.android.gms.maps.model.PolylineOptions
-import android.graphics.Color
 import com.google.maps.android.PolyUtil
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -39,7 +35,7 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import android.content.Intent
-import com.example.crimetracker.databinding.ActivityMainBinding
+import com.example.crimetracking.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -80,7 +76,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
         // Place SDK initialization
-        val apiKey = getString(R.string.google_maps_key)
+        val apiKey = BuildConfig.MAPS_API_KEY
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, apiKey)
         }
@@ -159,13 +155,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun drawRouteOnMap(encodedPolyline: String) {
         if (encodedPolyline.isEmpty() || map == null) return
 
-        // Decodes Polyline string into a list of LatLng coordinates
-        val points = com.google.maps.android.PolyUtil.decode(encodedPolyline)
+        val points = PolyUtil.decode(encodedPolyline)
 
         val polylineOptions = com.google.android.gms.maps.model.PolylineOptions()
             .addAll(points)
             .width(15f)
-            .color(android.graphics.Color.BLUE)
+            .color(0xFF0000FF.toInt())
             .geodesic(true)
 
         routePolyline = map?.addPolyline(polylineOptions)
@@ -173,7 +168,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         for (point in points) {
             bounds.include(point)
         }
-        map?.animateCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds.build(), 100))
+        map?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 100))
     }
 
     // Stores the current route line
@@ -189,20 +184,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         autocompleteFragment.setOnPlaceSelectedListener(object : com.google.android.libraries.places.widget.listener.PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 val destinationLatLng = place.latLng ?: return
-                val origin = currentLocation ?: fallbackOrigin
                 routePolyline?.remove()
 
                 // Origin of Syracuse University
                 val originLat = 43.0384
                 val originLng = -76.1343
-                val apiKey = getString(R.string.google_maps_key)
+                val apiKey = BuildConfig.MAPS_API_KEY
 
                 // Route calculation to the user's selected destination
                 fetchAndDrawRoute(
                     originLat = originLat,
                     originLng = originLng,
-                    //originLat = origin.latitude,
-                    //originLng = origin.longitude,
                     destLat = destinationLatLng.latitude,
                     destLng = destinationLatLng.longitude,
                     apiKey = apiKey
@@ -217,12 +209,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        googleMap.uiSettings.isZoomControlsEnabled = true
         val syracuseUniversity = LatLng(43.0384, -76.1343)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(syracuseUniversity, 10f))
         googleMap.setInfoWindowAdapter(CustomInfoWindowAdapter(this))
         googleMap.uiSettings.isZoomControlsEnabled = true
-        val apiKey = getString(R.string.google_maps_key)
 
         try {
             // Enable the built-in "My Location" blue dot
@@ -233,7 +223,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         requestCurrentLocation()
         addCrimeMarkers(googleMap)
-        setupAutocomplete()
     }
 
     // Checks for permission and requests location
@@ -345,7 +334,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
             val date = inputFormat.parse(rawDate)
             outputFormat.format(date!!)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             rawDate
         }
     }
@@ -360,7 +349,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
             val date = inputFormat.parse(paddedTime)
             outputFormat.format(date!!)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             rawTime
         }
     }

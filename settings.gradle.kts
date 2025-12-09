@@ -22,5 +22,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CrimeTracking"
 include(":app")

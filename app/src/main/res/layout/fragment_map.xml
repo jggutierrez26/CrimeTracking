@@ -31,37 +31,45 @@
     <LinearLayout
         android:id="@+id/crime_bottom_sheet"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:padding="16dp"
+        android:layout_height="wrap_content"
         android:background="@android:color/white"
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/bottom_sheet_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"> <TextView
             android:id="@+id/crime_title"
             android:text="Crime Details"
             android:textSize="20sp"
-            android:padding="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/crime_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Address" />
-
+            <TextView
+                android:id="@+id/crime_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Address" />
+        </LinearLayout>
         <TextView
             android:id="@+id/crime_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Date" />
+            android:text="Date"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp" />
 
         <TextView
             android:id="@+id/crime_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Time" />
+            android:text="Time"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp" />
 
     </LinearLayout>
 

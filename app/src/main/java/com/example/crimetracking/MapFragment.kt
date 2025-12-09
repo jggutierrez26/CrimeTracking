@@ -35,6 +35,9 @@ import org.json.JSONObject
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import android.view.Gravity
+import android.widget.Toast
+import com.google.maps.android.data.geojson.GeoJsonFeature
 
 class MapFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentMapBinding? = null
@@ -46,6 +49,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var currentLocation: LatLng? = null
     private val fallbackOrigin = LatLng(43.0384, -76.1343)
     private var routePolyline: com.google.android.gms.maps.model.Polyline? = null
+    private var crimeFeatures: List<GeoJsonFeature> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +64,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         initializeMapFeatures()
+
+        val headerView = binding.root.findViewById<View>(R.id.bottom_sheet_header)
+
+        headerView.post {
+            val headerHeightPx = headerView.height
+            bottomSheetBehavior.peekHeight = headerHeightPx
+            map?.setPadding(0, 0, 0, headerHeightPx)
+        }
     }
 
     private fun initializeMapFeatures() {
@@ -73,11 +85,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // Bottom Sheet initialization
         val bottomSheet = binding.root.findViewById<View>(R.id.crime_bottom_sheet)
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.peekHeight = 120
+        //bottomSheetBehavior.peekHeight = 80
+        bottomSheetBehavior.peekHeight = 1
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
         // Place SDK initialization
-        val apiKey = BuildConfig.MAPS_API_KEY
+        val apiKey = requireContext().getString(R.string.google_maps_key)
         if (!Places.isInitialized()) {
             Places.initialize(requireContext(), apiKey)
         }
@@ -152,6 +165,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             bounds.include(point)
         }
         map?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 100))
+        calculateCrimesAlongRoute(points)
     }
 
     private fun setupAutocomplete() {
@@ -168,7 +182,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                 val originLat = 43.0384
                 val originLng = -76.1343
-                val apiKey = BuildConfig.MAPS_API_KEY
+                val apiKey = requireContext().getString(R.string.google_maps_key)
 
                 fetchAndDrawRoute(
                     originLat = originLat,
@@ -233,8 +247,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         try {
             val jsonObject = readJsonResource(R.raw.syr_crime_data)
             val layer = GeoJsonLayer(googleMap, jsonObject)
+            crimeFeatures = layer.features.toList()
 
-            for (feature in layer.features) {
+            for (feature in crimeFeatures) {
                 val address = feature.getProperty("ADDRESS") ?: "Unknown Location"
                 val crimeType = feature.getProperty("CODE_DEFINED") ?: "Unknown Crime"
 
@@ -264,6 +279,34 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         } catch (e: Exception) {
             Log.e("CrimeTracker", "Error loading GeoJSON data", e)
+        }
+    }
+
+    private fun calculateCrimesAlongRoute(routePoints: List<LatLng>) {
+        if (routePoints.isEmpty() || crimeFeatures.isEmpty()) return
+
+        val oneMileInMeters = 1609.34
+        val crimesWithinRadius = mutableSetOf<GeoJsonFeature>()
+
+        for (feature in crimeFeatures) {
+            val geometry = feature.geometry
+            if (geometry is com.google.maps.android.data.geojson.GeoJsonPoint) {
+                val crimeLocation = geometry.coordinates
+
+                // Check if crime location is within 1 mile of the route polyline.
+                if (PolyUtil.isLocationOnPath(crimeLocation, routePoints, true, oneMileInMeters)) {
+                    crimesWithinRadius.add(feature)
+                }
+            }
+        }
+
+        val crimeCount = crimesWithinRadius.size
+
+        // Display the result using a long toast message
+        val message = "There are $crimeCount crime markers along the way."
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).apply {
+            setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 100)
+            show()
         }
     }
 

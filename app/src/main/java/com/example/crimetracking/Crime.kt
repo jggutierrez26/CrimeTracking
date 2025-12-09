@@ -1,4 +1,4 @@
-package com.example.crimetracker
+package com.example.crimetracking
 
 data class Crime(
     val address: String,

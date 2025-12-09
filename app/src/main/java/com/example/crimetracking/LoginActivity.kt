@@ -65,7 +65,7 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null && user.isEmailVerified) {
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this, HomeActivity::class.java))
                         finish()
                     } else {
                         AlertDialog.Builder(this)
@@ -90,7 +90,7 @@ class LoginActivity : AppCompatActivity() {
         // Auto-login if already signed in and verified
         val user = auth.currentUser
         if (user != null && user.isEmailVerified) {
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, HomeActivity::class.java))
             finish()
         }
     }

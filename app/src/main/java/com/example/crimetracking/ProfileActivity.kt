@@ -2,14 +2,12 @@ package com.example.crimetracking
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -28,8 +26,6 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var tvFirstName: TextView
     private lateinit var tvLastName: TextView
     private lateinit var tvEmail: TextView
-    private lateinit var btnChangeEmail: Button
-    private lateinit var btnChangePassword: Button
     private lateinit var btnAddEmergencyContact: Button
     private lateinit var rvEmergencyContacts: RecyclerView
     private lateinit var tvNoContacts: TextView
@@ -45,8 +41,6 @@ class ProfileActivity : AppCompatActivity() {
         tvFirstName = findViewById(R.id.tvFirstName)
         tvLastName = findViewById(R.id.tvLastName)
         tvEmail = findViewById(R.id.tvEmail)
-        btnChangeEmail = findViewById(R.id.btnChangeEmail)
-        btnChangePassword = findViewById(R.id.btnChangePassword)
         btnAddEmergencyContact = findViewById(R.id.btnAddEmergencyContact)
         rvEmergencyContacts = findViewById(R.id.rvEmergencyContacts)
         tvNoContacts = findViewById(R.id.tvNoContacts)
@@ -68,14 +62,6 @@ class ProfileActivity : AppCompatActivity() {
         // Set click listeners
         btnBack.setOnClickListener {
             finish()
-        }
-
-        btnChangeEmail.setOnClickListener {
-            showChangeEmailDialog()
-        }
-
-        btnChangePassword.setOnClickListener {
-            showChangePasswordDialog()
         }
 
         btnAddEmergencyContact.setOnClickListener {
@@ -171,122 +157,6 @@ class ProfileActivity : AppCompatActivity() {
         } else {
             btnAddEmergencyContact.isEnabled = true
             btnAddEmergencyContact.alpha = 1.0f
-        }
-    }
-
-    private fun showChangeEmailDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_email, null)
-        val etNewEmail = dialogView.findViewById<EditText>(R.id.etNewEmail)
-        val etPassword = dialogView.findViewById<EditText>(R.id.etPassword)
-
-        AlertDialog.Builder(this)
-            .setTitle("Change Email")
-            .setView(dialogView)
-            .setPositiveButton("Change") { _, _ ->
-                val newEmail = etNewEmail.text.toString().trim()
-                val password = etPassword.text.toString()
-
-                if (newEmail.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
-                    Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                if (password.isEmpty()) {
-                    Toast.makeText(this, "Please enter your password", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                changeEmail(newEmail, password)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun changeEmail(newEmail: String, password: String) {
-        val user = auth.currentUser
-        if (user != null && user.email != null) {
-            // Re-authenticate user first
-            val credential = EmailAuthProvider.getCredential(user.email!!, password)
-
-            user.reauthenticate(credential)
-                .addOnSuccessListener {
-                    // Update email in Firebase Auth
-                    @Suppress("DEPRECATION")
-                    user.updateEmail(newEmail)
-                        .addOnSuccessListener {
-                            // Update email in Firestore
-                            db.collection("users").document(user.uid)
-                                .update("email", newEmail)
-                                .addOnSuccessListener {
-                                    tvEmail.text = newEmail
-                                    Toast.makeText(this, "Email updated successfully", Toast.LENGTH_SHORT).show()
-                                }
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Error updating email: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Authentication failed. Check your password.", Toast.LENGTH_SHORT).show()
-                }
-        }
-    }
-
-    private fun showChangePasswordDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null)
-        val etCurrentPassword = dialogView.findViewById<EditText>(R.id.etCurrentPassword)
-        val etNewPassword = dialogView.findViewById<EditText>(R.id.etNewPassword)
-        val etConfirmPassword = dialogView.findViewById<EditText>(R.id.etConfirmPassword)
-
-        AlertDialog.Builder(this)
-            .setTitle("Change Password")
-            .setView(dialogView)
-            .setPositiveButton("Change") { _, _ ->
-                val currentPassword = etCurrentPassword.text.toString()
-                val newPassword = etNewPassword.text.toString()
-                val confirmPassword = etConfirmPassword.text.toString()
-
-                if (currentPassword.isEmpty()) {
-                    Toast.makeText(this, "Please enter current password", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                if (newPassword.length < 6) {
-                    Toast.makeText(this, "New password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                if (newPassword != confirmPassword) {
-                    Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                changePassword(currentPassword, newPassword)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun changePassword(currentPassword: String, newPassword: String) {
-        val user = auth.currentUser
-        if (user != null && user.email != null) {
-            // Re-authenticate user first
-            val credential = EmailAuthProvider.getCredential(user.email!!, currentPassword)
-
-            user.reauthenticate(credential)
-                .addOnSuccessListener {
-                    // Update password
-                    user.updatePassword(newPassword)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "Password updated successfully", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Error updating password: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Authentication failed. Check your current password.", Toast.LENGTH_SHORT).show()
-                }
         }
     }
 
@@ -410,12 +280,12 @@ class ProfileActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            updateEmergencyContact(contact, name, relation, phone)
+            updateEmergencyContact(contact.id, name, relation, phone)
             dialog.dismiss()
         }
     }
 
-    private fun updateEmergencyContact(contact: EmergencyContact, name: String, relation: String, phoneNumber: String) {
+    private fun updateEmergencyContact(contactId: String, name: String, relation: String, phoneNumber: String) {
         val user = auth.currentUser
         if (user != null) {
             val contactData = hashMapOf(
@@ -425,19 +295,19 @@ class ProfileActivity : AppCompatActivity() {
                 "updatedAt" to System.currentTimeMillis()
             )
 
-            android.util.Log.d("ProfileActivity", "Updating contact: ${contact.id}")
+            android.util.Log.d("ProfileActivity", "Updating contact: $contactId")
 
             db.collection("users").document(user.uid)
                 .collection("emergencyContacts")
-                .document(contact.id)
+                .document(contactId)
                 .update(contactData as Map<String, Any>)
                 .addOnSuccessListener {
                     android.util.Log.d("ProfileActivity", "Contact updated successfully")
                     // Update the contact in the list
-                    val position = emergencyContacts.indexOf(contact)
+                    val position = emergencyContacts.indexOfFirst { it.id == contactId }
                     if (position != -1) {
                         emergencyContacts[position] = EmergencyContact(
-                            id = contact.id,
+                            id = contactId,
                             name = name,
                             relation = relation,
                             phoneNumber = phoneNumber
@@ -523,4 +393,3 @@ class EmergencyContactsAdapter(
 
     override fun getItemCount() = contacts.size
 }
-
